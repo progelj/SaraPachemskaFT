@@ -9,8 +9,10 @@ function ARmodel_Univariate(channel_index, data, order)
     % - order: number of lags to use / number of history points
     
     % Extract the channel data 
-    inputData = data(channel_index, :);  
-    inputData = inputData'; % Transpose to column vector
+    inputData = data(channel_index, :); 
+
+    % Transpose to column vector
+    inputData = inputData'; 
 
     % Split data into training (80%) and testing (20%) sets
     train_ratio = 0.8;
@@ -63,7 +65,7 @@ function ARmodel_Univariate(channel_index, data, order)
 end
 
 function impulse_response_AR(order, coefficients)
-    % Calculate and plot the impulse response for the AR model
+
     % Order is the number of lags used
     % Coefficients are the AR model coefficients
 
