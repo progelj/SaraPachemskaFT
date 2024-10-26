@@ -105,5 +105,3 @@ function impulse_response_CNN(model)
     xlabel('Samples');
     ylabel('Amplitude');
 end
-
-
