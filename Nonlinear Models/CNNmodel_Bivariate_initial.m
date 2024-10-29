@@ -1,7 +1,7 @@
-function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
+function CNNmodel_Bivariate_initial(channel1_index, channel2_index, data)
     % CNN Model - Bivariate
 
-    % Quick test: CNNmodel_Bivariate_simple(1, 2, EEG.data)
+    % Quick test: CNNmodel_Bivariate_initial(1, 2, EEG.data)
 
     % This model uses two channels for prediction
     % Input: 
@@ -9,7 +9,7 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
     % - channel2_index: index of the second EEG channel (electrode) to use for prediction
     % - data: EEG data with multiple channels (rows are channels)
 
-    % Extract data for both specified channels
+    % Extract the channel data (single channel for the specified index)
     channel1Data = data(channel1_index, :);  % First channel to predict
     channel2Data = data(channel2_index, :);  % Second channel to assist prediction
 
@@ -33,29 +33,34 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
     XTest = reshape(XTest', [], 2, 1);   % [XTest', numTimeSteps, numFeatures, numObservations]
     YTest = reshape(YTest, [], 1);       % [YTest, numTimeSteps, 1]
 
-
     % CNN architecture
-    inputSize = 2; % Two features (channels) per time step
+    inputSize = 2; % One feature (channel) per time step
     numFilters = 32; % Number of filters / kernels
-    filterSize = 5; % Filter size 
+    filterSize = 10; % Filter size 
 
     layers = [
-        sequenceInputLayer(inputSize)                     % Sequence input with multiple features (channels)
-        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  % 1D convolutional layer
-        reluLayer                                         % ReLU activation layer
+        sequenceInputLayer(inputSize)               % Sequence input with 1 feature per time step
+        convolution1dLayer(filterSize, numFilters, 'Padding', 'same') % 1D convolutional layer
+        batchNormalizationLayer                     % Batch normalization layer
+        reluLayer                                   % ReLU activation layer
+        dropoutLayer(0.2)                           % 20% of the neurons are randomly dropped
 
-        fullyConnectedLayer(50)                           % Fully connected layer (50 neurons)
-        reluLayer                                         % ReLU activation layer
+        convolution1dLayer(filterSize, numFilters*2, 'Padding', 'same')  % Second convolutional layer
+        batchNormalizationLayer
+        reluLayer
+        dropoutLayer(0.2)
 
-        fullyConnectedLayer(1)                            % Output layer: predict next value
-        
+        fullyConnectedLayer(100)                    % Fully connected layer (100 neurons)
+        reluLayer                                   % ReLU activation layer
+
+        fullyConnectedLayer(1)                      % Output layer: predict next value
     ];                                             
 
     % Training options
     options = trainingOptions('adam', ...
         'MaxEpochs', 500, ...               % Number of epochs
         'MiniBatchSize', 64, ...            % Mini-batch size
-        'InitialLearnRate', 0.01, ...      % Learning rate
+        'InitialLearnRate', 0.001, ...      % Learning rate
         'Shuffle', 'every-epoch', ...       % Shuffle the data every epoch
         'ValidationData', {XTest, YTest}, ... % Validation data for early stopping
         'ValidationFrequency', 10, ...
@@ -63,7 +68,11 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
         'Verbose', false, ...                  
         'ValidationPatience', 10);          % Early stopping patience
 
-    % Train the model using trainNetwork
+    % layerFileName = 'CNN_Layers.mat'; % Specify the file name
+    % save(layerFileName, 'layers'); % Save the layers variable
+    % disp(['Layers saved to ', layerFileName]);
+
+    % Train the CNN model using trainnet and 'mse' loss function
     model = trainnet(XTrain, YTrain, layers, "mse", options);
 
     % Test the model on the test data
@@ -75,23 +84,24 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
     hold on;
     plot(YTest, 'b'); % Actual values in blue
     legend('Predicted', 'Actual');
-    title(['Simple CNN - Bivariate - Predicted vs Actual for Channels ' num2str(channel1_index) ' and ' num2str(channel2_index)]);
+    title(['Initial CNN - Bivariate - Predicted vs Actual for Channels ' num2str(channel1_index) ' and ' num2str(channel2_index)]);
 
     % Evaluate the performance (Mean Squared Error)
     mseError = mean((YPred - YTest).^2);
     disp(['CNN model - Mean Squared Error on Test Data: ', num2str(mseError)]);
 
-    % impulse_response_CNN(model);
+    %impulse_response_CNN(model);
+
 end
 
 function impulse_response_CNN(model)
+    % 
     % Impulse signal
-    impulse = zeros(100, 2); % Length of the response and two channels
-    impulse(1, 1) = 1; % Unit impulse for channel 1
-    impulse(1, 2) = 0; % No impulse for channel 2
+    impulse = zeros(100, 1); % Length of the response
+    impulse(1) = 1; % Unit impulse
 
     % Reshape the impulse for CNN input: [numTimeSteps, numFeatures, numObservations]
-    impulse = reshape(impulse, [], 1, 2); % [numTimeSteps, 1, numFeatures]
+    impulse = reshape(impulse, [], 1, 1); 
 
     % Predict using the CNN model
     impulse_response = predict(model, impulse);

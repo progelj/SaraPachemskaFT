@@ -24,8 +24,9 @@ function ARmodel_Bivariate(channel_index1, channel_index2, data, order)
     train_size = floor(train_ratio * num_samples);
 
     trainData1 = inputData1(1:train_size);  % Training data for channel 1
-    testData1 = inputData1(train_size+1:end);  % Testing data for channel 1
     trainData2 = inputData2(1:train_size);  % Training data for channel 2
+
+    testData1 = inputData1(train_size+1:end);  % Testing data for channel 1
     testData2 = inputData2(train_size+1:end);  % Testing data for channel 2
 
     % Lagged matrices for both channels
