@@ -1,15 +1,20 @@
-function ARmodel_Univariate_Find_Optimal_Order(channel_index, data, max_order)
+function ARmodel_Univariate_Find_Optimal_Order(channel_index, data)
+
+    % Quick test: ARmodel_Univariate_Find_Optimal_Order(1, EEG.data)
     
     % find the optimal order based on MSE,and run the code with lowest MSE
     % this is just for finding the optimal, so this means that the lowest
     % one might not my the optimal order
-    
-    % impulse response
+
+    % Comments:
+    % I set the max_order to cover approximately the number of samples 
+    % that correspond to 100 ms.
 
     % Input:
     % - channel_index: index of the EEG channel (electrode) to use for prediction
     % - data: EEG data (univariate time series)
-    % - max_order: maximum AR order to evaluate
+   
+    max_order = 32;
 
     % Extract the channel data 
     inputData = data(channel_index, :); 
@@ -53,11 +58,10 @@ function ARmodel_Univariate_Find_Optimal_Order(channel_index, data, max_order)
     legend('MSE per Order');
     hold off;
 
+    % Optional: I run the model with order that has lowest MSE
     % Run the model one more time with the optimal order for final prediction and plot
-    run_AR_model(inputData, train_size, optimal_order, true);
+    % run_AR_model(inputData, train_size, optimal_order, true);
 
-    % Display the impulse response for the optimal order
-    impulse_response_AR(optimal_order, optimal_coefficients);
 end
 
 function [mseError, coefficients] = run_AR_model(inputData, train_size, order, plot_flag)
@@ -102,23 +106,3 @@ function [mseError, coefficients] = run_AR_model(inputData, train_size, order, p
     disp(['AR model - Mean Squared Error on Test Data (Order ', num2str(order), '): ', num2str(mseError)]);
 end
 
-function impulse_response_AR(order, coefficients)
-    % Plot the impulse response of the AR model with the given order and coefficients.
-    % Input:
-    % - order: number of lags used
-    % - coefficients: AR model coefficients
-
-    % Generate the impulse signal
-    impulse = zeros(1, 100); % Length of the response
-    impulse(1) = 1; % Unit impulse
-    
-    % Calculate the impulse response
-    impulse_response = filter(1, [1; -coefficients], impulse);
-    
-    % Plot the impulse response
-    figure;
-    plot(impulse_response, 'LineWidth', 2);
-    title(['Impulse Response of AR Model (Order ' num2str(order) ')']);
-    xlabel('Samples');
-    ylabel('Amplitude');
-end
