@@ -37,7 +37,7 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
     % CNN architecture
     inputSize = 2; % Two features (channels) per time step
     numFilters = 32; % Number of filters / kernels
-    filterSize = 5; % Filter size 
+    filterSize = 16; % Filter size 
 
     layers = [
         sequenceInputLayer(inputSize)                     % Sequence input with multiple features (channels)
@@ -53,7 +53,7 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
 
     % Training options
     options = trainingOptions('adam', ...
-        'MaxEpochs', 500, ...               % Number of epochs
+        'MaxEpochs', 200, ...               % Number of epochs
         'MiniBatchSize', 64, ...            % Mini-batch size
         'InitialLearnRate', 0.01, ...      % Learning rate
         'Shuffle', 'every-epoch', ...       % Shuffle the data every epoch
@@ -61,7 +61,7 @@ function CNNmodel_Bivariate_simple(channel1_index, channel2_index, data)
         'ValidationFrequency', 10, ...
         'Plots', 'training-progress', ...   % Plot training progress
         'Verbose', false, ...                  
-        'ValidationPatience', 10);          % Early stopping patience
+        'ValidationPatience', 5);          % Early stopping patience
 
     % Train the model using trainNetwork
     model = trainnet(XTrain, YTrain, layers, "mse", options);

@@ -1,49 +1,27 @@
-function connectivityMatrix = CNN_Bivariate_initial_connectivityMatrix(data)
-    % Connectivity Matrix. Matrix where each element (i, j) represents the MSE
-    % of the CNN model when using channel i and channel j for prediction 
+function connectivityMatrix = CNNmodel_Bivariate_simple_connectivityMatrix(data)
+    % CNN Model - Bivariate Connectivity Matrix
 
-    % Quick test: CNN_Bivariate_initial_connectivityMatrix(EEG.data)
-
-    % Input:
-    % - data: EEG data 
-    % Output:
-    % - connectivityMatrix
+    % Quick test: CNNmodel_Bivariate_simple_connectivityMatrix(EEG.data)
+    % Each element (i, j) represents the MSE of the CNN model when using
+    % channel i and channel j for prediction.
     
-    numChannels = size(data, 1); % Number of channels 
-    disp(numChannels);
+    % Number of channels in the data
+    numChannels = size(data, 1); 
     connectivityMatrix = zeros(numChannels, numChannels); % Initialize the connectivity matrix
 
-    
-    % for ch1 = 1:numChannels
-    %     for ch2 = 1:numChannels
-    %         if ch1 ~= ch2 % Exclude self-connections
-    %             % Display the current channel pair being processed
-    %             fprintf('Processing channel pair: (%d, %d)\n', ch1, ch2);
-    %             % Train CNN model using ch1 and ch2 and obtain MSE
-    %             mseError = CNNmodel_Bivariate_test(ch1, ch2, data);
-    % 
-    %             % Store the MSE in the connectivity matrix
-    %             connectivityMatrix(ch1, ch2) = mseError;
-    %         else
-    %             connectivityMatrix(ch1, ch2) = NaN; % Optional: Set diagonal to NaN or 0
-    %         end
-    %     end
-    % end
-
-    % Parallel Computing 
+    % Parallel loop through all channel pairs to calculate MSE
     parfor ch1 = 1:numChannels
         for ch2 = 1:numChannels
             if ch1 ~= ch2
                 fprintf('Processing channel pair: (%d, %d)\n', ch1, ch2);
                 mseError = CNNmodel_Bivariate_test(ch1, ch2, data);
-                connectivityMatrix(ch1, ch2) = mseError;
+                connectivityMatrix(ch1, ch2) = mseError; % Store MSE in connectivity matrix
             else
-                connectivityMatrix(ch1, ch2) = NaN;
+                connectivityMatrix(ch1, ch2) = NaN; % Optional: Set diagonal to NaN
             end
         end
     end
 
-    
     % Display the connectivity matrix as a heatmap for visualization
     figure;
     imagesc(connectivityMatrix);
@@ -60,13 +38,12 @@ function connectivityMatrix = CNN_Bivariate_initial_connectivityMatrix(data)
     title('Connectivity Matrix - MSE between Channel Pairs');
     xlabel('Channel');
     ylabel('Channel');
-
 end
 
 function mseError = CNNmodel_Bivariate_test(channel1_index, channel2_index, data)
-
-    channel1Data = data(channel1_index, :);  
-    channel2Data = data(channel2_index, :);  
+    % Extract data for the specified channels
+    channel1Data = data(channel1_index, :);
+    channel2Data = data(channel2_index, :);
 
     % Split data into training (80%) and testing (20%) sets
     train_ratio = 0.8;
@@ -75,7 +52,6 @@ function mseError = CNNmodel_Bivariate_test(channel1_index, channel2_index, data
     % Prepare training and testing data
     XTrain = [channel1Data(1, 1:train_size); channel2Data(1, 1:train_size)];  
     YTrain = channel1Data(1, 1:train_size);  
-    
     XTest = [channel1Data(1, train_size + 1:end); channel2Data(1, train_size + 1:end)];
     YTest = channel1Data(1, train_size + 1:end);  
 
@@ -90,30 +66,28 @@ function mseError = CNNmodel_Bivariate_test(channel1_index, channel2_index, data
     numFilters = 32; 
     filterSize = 16; 
 
-    layers = [
-        sequenceInputLayer(inputSize)
-        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')
-        batchNormalizationLayer
-        reluLayer
-        dropoutLayer(0.2)
-        convolution1dLayer(filterSize, numFilters*2, 'Padding', 'same')
-        batchNormalizationLayer
-        reluLayer
-        dropoutLayer(0.2)
-        fullyConnectedLayer(100)
-        reluLayer
-        fullyConnectedLayer(1)
+     layers = [
+        sequenceInputLayer(inputSize)                     % Sequence input with multiple features (channels)
+        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  % 1D convolutional layer
+        reluLayer                                         % ReLU activation layer
+
+        fullyConnectedLayer(50)                           % Fully connected layer (50 neurons)
+        reluLayer                                         % ReLU activation layer
+
+        fullyConnectedLayer(1)                            % Output layer: predict next value
+        
     ];                                             
 
+    % Training options
     options = trainingOptions('adam', ...
-        'MaxEpochs', 200, ...
-        'MiniBatchSize', 64, ...
-        'InitialLearnRate', 0.001, ...
-        'Shuffle', 'every-epoch', ...
-        'ValidationData', {XTest, YTest}, ...
+        'MaxEpochs', 200, ...               % Number of epochs
+        'MiniBatchSize', 64, ...            % Mini-batch size
+        'InitialLearnRate', 0.01, ...      % Learning rate
+        'Shuffle', 'every-epoch', ...       % Shuffle the data every epoch
+        'ValidationData', {XTest, YTest}, ... % Validation data for early stopping
         'ValidationFrequency', 10, ...
-        'Verbose', false, ...
-        'ValidationPatience', 5);
+        'Verbose', false, ...                  
+        'ValidationPatience', 5);          % Early stopping patience
 
     % Train the CNN model
     model = trainnet(XTrain, YTrain, layers, "mse", options);

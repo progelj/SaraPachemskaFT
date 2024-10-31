@@ -1,18 +1,24 @@
-function ARmodel_Univariate(channel_index, data, order)
+function ARmodel_Univariate(channel_index, data)
     % Augroregressive Model - Univariate
 
-    % Quick test: ARmodel_Univariate(1, EEG.data, 10)
+    % Quick test: ARmodel_Univariate(1, EEG.data)
 
     % Input:
     % - channel_index: index of the EEG channel (electrode) to use for prediction
     % - data: EEG data (univariate time series)
-    % - order: number of lags to use / number of history points
+
+    % Impulse response
     
     % Extract the channel data 
     inputData = data(channel_index, :); 
 
     % Transpose to column vector
     inputData = inputData'; 
+
+    % After testing the 'ARmodel_Univariate_Find_Optimal_Order' script, we find out that 
+    % 16 can be optimal order for our data
+    % order: number of lags to use / number of history points
+    order = 16;
 
     % Split data into training (80%) and testing (20%) sets
     train_ratio = 0.8;

@@ -58,7 +58,7 @@ function CNNmodel_Bivariate_initial(channel1_index, channel2_index, data)
 
     % Training options
     options = trainingOptions('adam', ...
-        'MaxEpochs', 500, ...               % Number of epochs
+        'MaxEpochs', 200, ...               % Number of epochs
         'MiniBatchSize', 64, ...            % Mini-batch size
         'InitialLearnRate', 0.001, ...      % Learning rate
         'Shuffle', 'every-epoch', ...       % Shuffle the data every epoch
@@ -66,7 +66,7 @@ function CNNmodel_Bivariate_initial(channel1_index, channel2_index, data)
         'ValidationFrequency', 10, ...
         'Plots', 'training-progress', ...   % Plot training progress
         'Verbose', false, ...                  
-        'ValidationPatience', 10);          % Early stopping patience
+        'ValidationPatience', 5);          % Early stopping patience
 
     % layerFileName = 'CNN_Layers.mat'; % Specify the file name
     % save(layerFileName, 'layers'); % Save the layers variable
