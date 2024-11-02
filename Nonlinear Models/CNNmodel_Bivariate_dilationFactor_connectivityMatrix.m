@@ -1,8 +1,8 @@
-function connectivityMatrix = CNN_Bivariate_dilationFactor_connectivityMatrix(data)
+function connectivityMatrix = CNNmodel_Bivariate_dilationFactor_connectivityMatrix(data)
     % Connectivity Matrix. Matrix where each element (i, j) represents the MSE
     % of the CNN model when using channel i and channel j for prediction 
 
-    % Quick test: CNN_Bivariate_dilationFactor_connectivityMatrix(EEG.data)
+    % Quick test: CNNmodel_Bivariate_dilationFactor_connectivityMatrix(EEG.data)
 
     % Input:
     % - data: EEG data 
@@ -47,22 +47,16 @@ function connectivityMatrix = CNN_Bivariate_dilationFactor_connectivityMatrix(da
 end
 
 function mseError = CNNmodel_Bivariate_test(channel1_index, channel2_index, data)
- % CNN Model with Dilated Convolutions and Residual Connections
+    % CNN Model with Dilated Convolutions and Residual Connections
     % Code: https://www.mathworks.com/help/deeplearning/ug/sequence-to-sequence-classification-using-1-d-convolutions.html
-
-    % Quick test: CNNmodel_Bivariate_dilationFactor(1, 2, EEG.data)
-
+    
     % This model uses two channels for prediction
-    % Input: 
-    % - channel1_index: index of the first EEG channel (electrode) to use for prediction
-    % - channel2_index: index of the second EEG channel (electrode) to use for prediction
-    % - data: EEG data with multiple channels (rows are channels)
 
     % Hardcoded hyperparameters
-    numBlocks = 4;       % Number of residual blocks
-    numFilters = 32;     % Number of filters in each convolution layer
+    numBlocks = 4;        % Number of residual blocks
+    numFilters = 32;      % Number of filters in each convolution layer
     filterSize = 16;      % Size of the convolution filters
-    dropoutFactor = 0.5; % Dropout probability for dropout layer
+    dropoutFactor = 0.5;  % Dropout probability for dropout layer
 
     % Extract the channel data 
     channel1Data = data(channel1_index, :);  % First channel to predict
@@ -139,12 +133,12 @@ function mseError = CNNmodel_Bivariate_test(channel1_index, channel2_index, data
     options = trainingOptions('adam', ...
         'MaxEpochs', 200, ...               % Number of epochs
         'MiniBatchSize', 64, ...            % Mini-batch size
-        'InitialLearnRate', 0.1, ...       % Learning rate
+        'InitialLearnRate', 0.1, ...        % Learning rate
         'Shuffle', 'every-epoch', ...       % Shuffle the data every epoch
         'ValidationData', {XTest, YTest}, ... % Validation data for early stopping
         'ValidationFrequency', 10, ...
         'Verbose', false, ...                  
-        'ValidationPatience', 5);          % Early stopping patience
+        'ValidationPatience', 5);           % Early stopping patience
 
     % Train the network using trainnet and MSE loss
     model = trainnet(XTrain, YTrain, net, "mse", options);

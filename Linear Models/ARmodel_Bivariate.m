@@ -2,7 +2,7 @@ function ARmodel_Bivariate(channel_index1, channel_index2, data, order)
     % Augroregressive Model - Bivariate
     % Predict channel 1 based on its own history and the history of channel 2
 
-    % Quick test: ARmodel_Bivariate(1, 2, EEG.data, 10)
+    % Quick test: ARmodel_Bivariate(1, 2, EEG.data, 16)
 
     % Input:
     % - channel_index1: index of the EEG channel to predict (output)

@@ -1,8 +1,8 @@
-function connectivityMatrix = CNN_Bivariate_initial_connectivityMatrix(data)
+function connectivityMatrix = CNNmodel_Bivariate_initial_connectivityMatrix(data)
     % Connectivity Matrix. Matrix where each element (i, j) represents the MSE
     % of the CNN model when using channel i and channel j for prediction 
 
-    % Quick test: CNN_Bivariate_initial_connectivityMatrix(EEG.data)
+    % Quick test: CNNmodel_Bivariate_initial_connectivityMatrix(EEG.data)
 
     % Input:
     % - data: EEG data 

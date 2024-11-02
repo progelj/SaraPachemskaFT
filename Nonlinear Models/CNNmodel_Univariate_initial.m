@@ -7,6 +7,8 @@ function CNNmodel_Univariate_initial(channel_index, data)
     % - channel_index: index of the EEG channel (electrode) to use for prediction
     % - EEG_data: EEG data
 
+    % Impulse response
+
     % Extract the channel data (single channel for the specified index)
     inputData = data(channel_index, :); 
 
@@ -30,7 +32,7 @@ function CNNmodel_Univariate_initial(channel_index, data)
     % CNN architecture
     inputSize = 1; % One feature (channel) per time step
     numFilters = 32; % Number of filters / kernels
-    filterSize = 10; % Filter size 
+    filterSize = 16; % Filter size 
 
     layers = [
         sequenceInputLayer(inputSize)               % Sequence input with 1 feature per time step
@@ -52,7 +54,7 @@ function CNNmodel_Univariate_initial(channel_index, data)
 
     % Training options
     options = trainingOptions('adam', ...
-        'MaxEpochs', 500, ...               % Number of epochs
+        'MaxEpochs', 200, ...               % Number of epochs
         'MiniBatchSize', 64, ...            % Mini-batch size
         'InitialLearnRate', 0.001, ...      % Learning rate
         'Shuffle', 'every-epoch', ...       % Shuffle the data every epoch
@@ -60,7 +62,7 @@ function CNNmodel_Univariate_initial(channel_index, data)
         'ValidationFrequency', 10, ...
         'Plots', 'training-progress', ...   % Plot training progress
         'Verbose', false, ...                  
-        'ValidationPatience', 10);          % Early stopping patience
+        'ValidationPatience', 5);          % Early stopping patience
 
     % layerFileName = 'CNN_Layers.mat'; % Specify the file name
     % save(layerFileName, 'layers'); % Save the layers variable
@@ -84,33 +86,50 @@ function CNNmodel_Univariate_initial(channel_index, data)
     mseError = mean((YPred - YTest).^2);
     disp(['CNN model - Mean Squared Error on Test Data: ', num2str(mseError)]);
 
-    impulse_response_CNN(model);
+    impulse_response_CNN(model, filterSize);
 
 end
 
 
 
-function impulse_response_CNN(model)
-    % 
-    % Impulse signal
-    impulse = zeros(100, 1); % Length of the response
-    impulse(1) = 1; % Unit impulse
+function impulse_response_CNN(model, filterSize)
+   % Initialize impulse signal with a single unit impulse
+    impulse_length = 100;  % Length of the impulse response
+    impulse_response = zeros(impulse_length, 1);  
+    impulse_window = zeros(filterSize, 1); 
+    impulse_window(1) = 1;  % Set the unit impulse in the first position
 
-    % Reshape the impulse for CNN input: [numTimeSteps, numFeatures, numObservations]
-    impulse = reshape(impulse, [], 1, 1); 
+    % Calculate the impulse response 
+    for t = 1:impulse_length
+        if t > filterSize
+            impulse_response(t) = 0;
+        else
+            % Reshape [filterSize, 1, 1]
+            input_window = reshape(impulse_window, [filterSize, 1, 1]);
 
-    % Predict using the CNN model
-    impulse_response = predict(model, impulse);
-    
-    % Check if the impulse response needs reshaping
-    if size(impulse_response, 1) > 1
-        impulse_response = squeeze(impulse_response); 
+            % Predict the next value
+            next_value = predict(model, input_window);
+
+            % Ensure next_value is scalar
+            next_value = squeeze(next_value);
+
+            % Confirm that next_value is scalar; if not, take only the first element
+            if numel(next_value) > 1
+                next_value = next_value(1);
+            end
+
+            % Store the prediction in the response vector
+            impulse_response(t) = next_value;
+
+            % Slide the window forward: shift and add the new prediction as the last element
+            impulse_window = [impulse_window(2:end); next_value];
+        end
     end
 
-    % Plot 
+    % Plot the impulse response
     figure;
     plot(impulse_response, 'LineWidth', 2);
-    title('Impulse Response of CNN Model');
+    title('Autoregressive Impulse Response of CNN Model');
     xlabel('Samples');
     ylabel('Amplitude');
 end
