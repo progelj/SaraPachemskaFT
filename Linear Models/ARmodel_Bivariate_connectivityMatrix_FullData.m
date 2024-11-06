@@ -49,12 +49,14 @@ function mseError = ARmodel_Bivariate_test_FullData(channel1_index, channel2_ind
     order = 16;
 
     % Extract the channels data 
-    inputData1 = data(channel1_index, :);  % First channel (output)
-    inputData2 = data(channel2_index, :);  % Second channel (predictor)
+    inputData1 = data(channel1_index, :);  % First channel 
+    inputData2 = data(channel2_index, :);  % Second channel 
     
     % Transpose to column vectors
     inputData1 = inputData1';  
     inputData2 = inputData2';
+
+    disp(inputData1);
 
     % Prepare lagged matrices for both channels on the full dataset
     Xfull = [];

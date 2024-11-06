@@ -2,7 +2,7 @@ function ARmodel_Bivariate_FullData(channel_index1, channel_index2, data, order)
     % Bivariate Autoregressive Model using Full Data (no train-test split)
     % Predict channel 1 based on its own history and the history of channel 2
 
-    % Quick test: ARmodel_Bivariate_FullData(1, 1, EEG.data, 16)
+    % Quick test: ARmodel_Bivariate_FullData(1, 2, EEG.data, 16)
 
     % Input:s
     % - channel_index1: index of the EEG channel to predict (output)
@@ -16,7 +16,7 @@ function ARmodel_Bivariate_FullData(channel_index1, channel_index2, data, order)
     
     % Transpose both to column vectors
     inputData1 = inputData1';  
-    inputData2 = inputData2';  
+    inputData2 = inputData2';
 
     % Prepare lagged matrices for the full dataset
     Xfull = [];
@@ -28,10 +28,15 @@ function ARmodel_Bivariate_FullData(channel_index1, channel_index2, data, order)
     end
 
     % Fit the model on the full dataset
+    % coefficients are 2 * order because I have 2 channels
     coefficients = (Xfull' * Xfull) \ (Xfull' * Yfull);
+
+    % disp(coefficients);    
 
     % Predictions for the full dataset
     YPred_full = Xfull * coefficients;  % Predicted values for the full data
+
+    disp(length(YPred_full))
     
     % Pad the first 'order' points with NaN for alignment
     YPred_full = [nan(order, 1); YPred_full];
