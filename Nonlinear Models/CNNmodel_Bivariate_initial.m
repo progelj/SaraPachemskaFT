@@ -89,32 +89,6 @@ function CNNmodel_Bivariate_initial(channel1_index, channel2_index, data)
     % Evaluate the performance (Mean Squared Error)
     mseError = mean((YPred - YTest).^2);
     disp(['CNN model - Mean Squared Error on Test Data: ', num2str(mseError)]);
-
-    %impulse_response_CNN(model);
-
-end
-
-function impulse_response_CNN(model)
-    % 
-    % Impulse signal
-    impulse = zeros(100, 1); % Length of the response
-    impulse(1) = 1; % Unit impulse
-
-    % Reshape the impulse for CNN input: [numTimeSteps, numFeatures, numObservations]
-    impulse = reshape(impulse, [], 1, 1); 
-
-    % Predict using the CNN model
-    impulse_response = predict(model, impulse);
     
-    % Check if the impulse response needs reshaping
-    if size(impulse_response, 1) > 1
-        impulse_response = squeeze(impulse_response); 
-    end
-
-    % Plot 
-    figure;
-    plot(impulse_response, 'LineWidth', 2);
-    title('Impulse Response of CNN Model');
-    xlabel('Samples');
-    ylabel('Amplitude');
 end
+
