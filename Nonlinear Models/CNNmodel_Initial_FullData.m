@@ -1,5 +1,5 @@
-function logRatio = CNNmodel_Simple_FullData(channel1_index, channel2_index, data)
-    % CNN Model - Simple Solution
+function logRatio = CNNmodel_Initial_FullData(channel1_index, channel2_index, data)
+    % CNN Model - Initial Solution
     % Computes the log ratio of error variances for a CNN-based model using two channels.
     %
     % Parameters:
@@ -31,19 +31,27 @@ function logRatio = CNNmodel_Simple_FullData(channel1_index, channel2_index, dat
     filterSize = 16; % Filter size 
 
     layers_bi = [
-        sequenceInputLayer(2)                     
-        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  
-        reluLayer                                         
-        fullyConnectedLayer(50)                           
-        reluLayer                                         
-        fullyConnectedLayer(1)                            
+        sequenceInputLayer(1)                     % Sequence input with multiple features (channels)
+        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  % 1D convolutional layer
+        batchNormalizationLayer                           % Batch normalization layer
+        reluLayer                                         % ReLU activation layer
+        dropoutLayer(0.2)                                 % 20% dropout
+
+        convolution1dLayer(filterSize, numFilters * 2, 'Padding', 'same') % Second convolutional layer
+        batchNormalizationLayer
+        reluLayer
+        dropoutLayer(0.2)
+
+        fullyConnectedLayer(100)                          % Fully connected layer (100 neurons)
+        reluLayer                                         % ReLU activation layer
+        fullyConnectedLayer(1)                            % Output layer: predict next value                          
     ];                                             
 
     % Training options
     options_bi = trainingOptions('adam', ...
         'MaxEpochs', 200, ...               
         'MiniBatchSize', 64, ...            
-        'InitialLearnRate', 0.01, ...       
+        'InitialLearnRate', 0.001, ...       
         'Shuffle', 'every-epoch', ...       
         'ValidationData', {XTest_bi, YTest_bi}, ...
         'ValidationFrequency', 10, ... 
@@ -67,18 +75,26 @@ function logRatio = CNNmodel_Simple_FullData(channel1_index, channel2_index, dat
     YTest_uni = YTrain_uni;
 
     layers_uni = [
-        sequenceInputLayer(1)                              % Input layer with 1 feature (univariate)
-        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  
-        reluLayer                                          % ReLU activation layer
-        fullyConnectedLayer(50)                            % Fully connected layer (50 neurons)
-        reluLayer                                          % ReLU activation layer
-        fullyConnectedLayer(1)                             % Output layer: predict next value
+        sequenceInputLayer(2)                     % Sequence input with multiple features (channels)
+        convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  % 1D convolutional layer
+        batchNormalizationLayer                           % Batch normalization layer
+        reluLayer                                         % ReLU activation layer
+        dropoutLayer(0.2)                                 % 20% dropout
+
+        convolution1dLayer(filterSize, numFilters * 2, 'Padding', 'same') % Second convolutional layer
+        batchNormalizationLayer
+        reluLayer
+        dropoutLayer(0.2)
+
+        fullyConnectedLayer(100)                          % Fully connected layer (100 neurons)
+        reluLayer                                         % ReLU activation layer
+        fullyConnectedLayer(1)                            % Output layer: predict next value
     ];  
 
      options_uni = trainingOptions('adam', ...
         'MaxEpochs', 200, ...               
         'MiniBatchSize', 64, ...            
-        'InitialLearnRate', 0.01, ...       
+        'InitialLearnRate', 0.001, ...       
         'Shuffle', 'every-epoch', ...       
         'ValidationData', {Xtest_uni, YTest_uni}, ...
         'ValidationFrequency', 10, ... 
@@ -92,7 +108,7 @@ function logRatio = CNNmodel_Simple_FullData(channel1_index, channel2_index, dat
     YPred_uni = predict(model_uni, Xtest_uni); 
 
     % --- Compute error variances ---
-    error_bi = YTest_bi - YPred_bi;  % Error for bivariate model
+    error_bi = YTest - YPred_bi;  % Error for bivariate model
     error_uni = YTest_uni - YPred_uni;  % Error for univariate model
 
     % Compute the variance of errors for both models
