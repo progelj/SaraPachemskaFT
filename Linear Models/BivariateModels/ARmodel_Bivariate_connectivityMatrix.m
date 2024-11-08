@@ -13,7 +13,7 @@ function connectivityMatrix = ARmodel_Bivariate_connectivityMatrix(data)
     disp(numChannels);
     connectivityMatrix = zeros(numChannels, numChannels); % Initialize the connectivity matrix
 
-    % Parallel Computing 
+    % Computing 
     for ch1 = 1:numChannels
         for ch2 = 1:numChannels
             if ch1 ~= ch2

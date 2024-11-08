@@ -8,8 +8,24 @@ function connectivityMatrix = ARmodel_Bivariate_connectivityMatrix_FullData(data
     % - data: EEG data 
     % Output:
     % - connectivityMatrix
+
+    clear all;
+    close all;
+    eeglab;
+    % load the data
+    % EEG = pop_biosig('/home/peter/Projects/EEG-data/eeg-motor-movementimagery-dataset-1.0.0/S001/S001R03.edf');
+    EEG = pop_biosig('C:\Users\Acer\Downloads\S001R02.edf');
     
-    numChannels = size(data, 1); 
+    % loading electrode positions:
+    EEG=pop_chanedit(EEG, 'load',{['C:\Users\Acer\Downloads\BCI2000.locs'] 'filetype' 'autodetect'});
+    
+    % reduce channel nr. 
+    % Re-reference to average 
+    EEG = pop_reref( EEG, []);
+    % select only 19 out of 64 channels
+    EEG = pop_select( EEG, 'channel',{'C3','Cz','C4','Fp1','Fp2','F7','F3','Fz','F4','F8','T7','T8','P7','P3','Pz','P4','P8','O1','O2'});
+    
+    numChannels = size(EEG.data, 1); 
     connectivityMatrix = zeros(numChannels, numChannels); % Initialize the connectivity matrix
 
     % Compute connectivity for each pair of channels
@@ -17,7 +33,7 @@ function connectivityMatrix = ARmodel_Bivariate_connectivityMatrix_FullData(data
         for ch2 = 1:numChannels
             if ch1 ~= ch2
                 fprintf('Processing channel pair: (%d, %d)\n', ch1, ch2);
-                mseError = ARmodel_Bivariate_test_FullData(ch1, ch2, data);
+                mseError = ARmodel_Bivariate_test_FullData(ch1, ch2, EEG.data);
                 connectivityMatrix(ch1, ch2) = mseError;
             else
                 connectivityMatrix(ch1, ch2) = NaN;  % Diagonal elements are NaN
@@ -31,7 +47,7 @@ function connectivityMatrix = ARmodel_Bivariate_connectivityMatrix_FullData(data
     colorbar;
     
     % Adjust the axes to place (1,1) in the bottom-left corner
-    set(gca, 'YDir', 'normal');  % Reverses the y-axis direction so 1 is at the bottom
+    % set(gca, 'YDir', 'normal');  % Reverses the y-axis direction so 1 is at the bottom
     
     % Set tick labels to match channel numbers starting from 1
     xticks(1:numChannels);
@@ -56,7 +72,6 @@ function mseError = ARmodel_Bivariate_test_FullData(channel1_index, channel2_ind
     inputData1 = inputData1';  
     inputData2 = inputData2';
 
-    disp(inputData1);
 
     % Prepare lagged matrices for both channels on the full dataset
     Xfull = [];
