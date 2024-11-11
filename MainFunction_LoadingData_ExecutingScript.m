@@ -1,4 +1,3 @@
-% main_CNNmodel_connectivityMatrix.m
 % Main script to compute the connectivity matrix using CNN model log error variance ratios
 
 % Paths to the EEG data and channel location files
@@ -18,17 +17,7 @@ channels = {'C3','Cz','C4','Fp1','Fp2','F7','F3','Fz','F4','F8',...
             'T7','T8','P7','P3','Pz','P4','P8','O1','O2'};
 EEG = pop_select(EEG, 'channel', channels);
 
-% Compute the connectivity matrix using CNN model
-connectivityMatrix = ConnectivityMatrix(EEG.data);
+% Executing the script
+% ARmodel_connectivityMatrix_FullData(EEG.data, channels)
+ConnectivityMatrixAR(EEG.data, channels);
 
-% Display the connectivity matrix as a heatmap
-figure;
-imagesc(connectivityMatrix);
-colorbar;
-xticks(1:numel(channels));
-yticks(1:numel(channels));
-xticklabels(channels);
-yticklabels(channels);
-title('CNN Connectivity Matrix - Log Ratio of Error Variances');
-xlabel('Channel');
-ylabel('Channel');

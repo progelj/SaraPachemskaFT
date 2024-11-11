@@ -31,7 +31,7 @@ function logRatio = CNNmodel_Initial_FullData(channel1_index, channel2_index, da
     filterSize = 16; % Filter size 
 
     layers_bi = [
-        sequenceInputLayer(1)                     % Sequence input with multiple features (channels)
+        sequenceInputLayer(2)                     % Sequence input with multiple features (channels)
         convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  % 1D convolutional layer
         batchNormalizationLayer                           % Batch normalization layer
         reluLayer                                         % ReLU activation layer
@@ -75,7 +75,7 @@ function logRatio = CNNmodel_Initial_FullData(channel1_index, channel2_index, da
     YTest_uni = YTrain_uni;
 
     layers_uni = [
-        sequenceInputLayer(2)                     % Sequence input with multiple features (channels)
+        sequenceInputLayer(1)                     % Sequence input with multiple features (channels)
         convolution1dLayer(filterSize, numFilters, 'Padding', 'same')  % 1D convolutional layer
         batchNormalizationLayer                           % Batch normalization layer
         reluLayer                                         % ReLU activation layer
@@ -108,7 +108,7 @@ function logRatio = CNNmodel_Initial_FullData(channel1_index, channel2_index, da
     YPred_uni = predict(model_uni, Xtest_uni); 
 
     % --- Compute error variances ---
-    error_bi = YTest - YPred_bi;  % Error for bivariate model
+    error_bi = YTest_bi - YPred_bi;  % Error for bivariate model
     error_uni = YTest_uni - YPred_uni;  % Error for univariate model
 
     % Compute the variance of errors for both models

@@ -1,29 +1,4 @@
-function connectivityMatrix = ARmodel_connectivityMatrix_FullData(data)
-    % compute_connectivity_matrix
-    % Computes the connectivity matrix using logarithmic error variance ratios.
-    %
-    % Parameters:
-    %   data : matrix, EEG data with channels as rows
-    %
-    % Returns:
-    %   connectivityMatrix : matrix, connectivity matrix with log error variance ratios
-
-    numChannels = size(data, 1);
-    connectivityMatrix = NaN(numChannels); % Initialize with NaNs
-
-    % Compute connectivity for each pair of channels
-    for ch1 = 1:numChannels
-        for ch2 = 1:numChannels
-            if ch1 ~= ch2
-                fprintf('Processing channel pair: (%d, %d)\n', ch1, ch2);
-                connectivityMatrix(ch1, ch2) = ...
-                    ARmodel_log_error_variance_ratio(ch1, ch2, data);
-            end
-        end
-    end
-end
-
-function logRatio = ARmodel_log_error_variance_ratio(channel1, channel2, data)
+function logRatio = ARmodel_FullData(channel1, channel2, data)
     % Computes the log ratio of error variances between two channels.
     %
     % Parameters:
@@ -42,13 +17,13 @@ function logRatio = ARmodel_log_error_variance_ratio(channel1, channel2, data)
 
     Y_target = inputData1(order+1:end); % Target values
 
-    % Create lagged predictors for univariate model on channel 1
+    % Create lagged predictors for univariate model on channel1
     X_uni = create_lagged_matrix(inputData1, order);
 
     % Fit univariate model and compute prediction error
     error_uni = compute_model_error(X_uni, Y_target);
 
-    % Create lagged predictors for bivariate model on channels 1 and 2
+    % Create lagged predictors for bivariate model on channels1 and2
     X_bi = create_lagged_matrix([inputData1, inputData2], order);
 
     % Fit bivariate model and compute prediction error
@@ -56,6 +31,12 @@ function logRatio = ARmodel_log_error_variance_ratio(channel1, channel2, data)
 
     % Log ratio of variances
     logRatio = log(var(error_uni) / var(error_bi));
+
+    % Calculate and display impulse response (optional, for this pair)
+    %impulseResponse = calculate_impulse_response(coefficients, order);
+    % disp('Impulse Response for the bivariate model:');
+    % disp(impulseResponse);
+
 end
 
 function laggedMatrix = create_lagged_matrix(data, order)
@@ -91,3 +72,29 @@ function error = compute_model_error(X, Y)
     Y_pred = X * coefficients;          % Predicted values
     error = Y - Y_pred;                 % Prediction error
 end
+
+function impulseResponse = calculate_impulse_response(coefficients, order)
+    % Calculates the impulse response for an autoregressive model.
+    %
+    % Parameters:
+    %   coefficients : vector, AR model coefficients for bivariate model
+    %   order        : int, model order (number of lags)
+    %
+    % Returns:
+    %   impulseResponse : vector, impulse response over time
+    
+    % Reshape coefficients to separate for each lag and channel
+    numChannels = 2; % Assuming bivariate model (2 channels)
+    coefficients = reshape(coefficients, order, numChannels);
+
+    % Initialize impulse response (identity for the first time step)
+    impulseResponse = eye(numChannels);
+
+    % Calculate impulse response iteratively
+    for t = 2:order
+        impulseResponse(:, t) = coefficients(t, :)' * impulseResponse(:, t - 1);
+    end
+end
+
+
+

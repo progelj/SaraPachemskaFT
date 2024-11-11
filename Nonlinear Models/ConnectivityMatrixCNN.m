@@ -1,4 +1,4 @@
-function connectivityMatrix = ConnectivityMatrix(data)
+function connectivityMatrix = ConnectivityMatrixCNN(data, channels)
     % Compute Connectivity Matrix with Parallel Processing
     % Computes the connectivity matrix using CNN model's logarithmic error variance ratios.
     %
@@ -17,9 +17,25 @@ function connectivityMatrix = ConnectivityMatrix(data)
         for ch2 = 1:numChannels
             if ch1 ~= ch2
                 fprintf('Processing channel pair: (%d, %d)\n', ch1, ch2);
+                % Change the model script in order to test
                 tempRow(ch2) = CNNmodel_Simple_FullData(ch1, ch2, data);
             end
         end
         connectivityMatrix(ch1, :) = tempRow;  % Update the row in the connectivity matrix
     end
+
+    plotCM(connectivityMatrix, channels);
+end
+
+function plotCM(connectivityMatrix, channels)
+    figure;
+    imagesc(connectivityMatrix);
+    colorbar;
+    xticks(1:numel(channels));
+    yticks(1:numel(channels));
+    xticklabels(channels);
+    yticklabels(channels);
+    title('CNN Connectivity Matrix - Log Ratio of Error Variances');
+    xlabel('Channel');
+    ylabel('Channel');
 end
