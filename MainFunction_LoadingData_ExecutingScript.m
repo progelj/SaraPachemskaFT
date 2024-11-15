@@ -18,6 +18,7 @@ channels = {'C3','Cz','C4','Fp1','Fp2','F7','F3','Fz','F4','F8',...
 EEG = pop_select(EEG, 'channel', channels);
 
 % Executing the script
-% ARmodel_connectivityMatrix_FullData(EEG.data, channels)
-ConnectivityMatrixAR(EEG.data, channels);
+% ConnectivityMatirxAR(EEG.data, channels);
+ConnectivityMatrixCNN(EEG.data, channels);
+ % CNNmodel_Simple_FullData(1, 2, EEG.data);
 

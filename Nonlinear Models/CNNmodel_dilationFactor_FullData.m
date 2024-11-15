@@ -14,7 +14,7 @@ function logRatio = CNNmodel_dilationFactor_FullData(channel1_index, channel2_in
     numBlocks = 4;       % Number of residual blocks
     numFilters = 32;     % Number of filters in each convolution layer
     filterSize = 5;      % Size of the convolution filters
-    dropoutFactor = 0.5; % Dropout probability for dropout layer
+    dropoutFactor = 0.005; % Dropout probability for dropout layer
 
     % --- Bivariate model (using both channels) ---
 
