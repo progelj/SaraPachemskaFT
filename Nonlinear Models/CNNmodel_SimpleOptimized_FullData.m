@@ -3,19 +3,22 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     %
     % Parameters:
     %   channel1_index : Index of the first channel (target channel)
-    %   channel2_index : Index of the second channel (helper channel)
-    %   data           : EEG data matrix (rows: channels, columns: time points)
+    %   channel2_index : Index of the second channel 
+    %   data           : EEG data matrix 
     %
     % Returns:
     %   logRatio : Logarithmic ratio of error variances (univariate vs bivariate)
     
     % Extract channel data
-    channel1Data = data(channel1_index, :);  % First channel (target)
-    channel2Data = data(channel2_index, :);  % Second channel (helper)
+    channel1Data = data(channel1_index, :);  
+    channel2Data = data(channel2_index, :); 
+
+    filterSize = 16;
+    numOfFilters = 128;
 
     % Train Univariate Model
-    X_uni = channel1Data;  % Univariate input
-    Y_uni = channel1Data;  % Univariate target
+    X_uni = channel1Data;  
+    Y_uni = channel1Data;  
 
     % Reshape data for NN input
     XTrain_uni = reshape(X_uni, [], 1, 1);  
@@ -24,9 +27,9 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Define univariate network
     layers_uni = [
         sequenceInputLayer(1)
-        convolution1dLayer(16, 128, 'Padding', 'same');
+        convolution1dLayer(filterSize, numOfFilters, 'Padding', 'same');
         reluLayer
-        fullyConnectedLayer(1)  % Output layer
+        fullyConnectedLayer(1)  
     ];
 
     % Training options
@@ -39,6 +42,8 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
 
     % Train the univariate model
     model_uni = trainnet(XTrain_uni, YTrain_uni, layers_uni, "mse", options_uni);
+
+    save('univariate_model.mat', 'model_uni');
 
     % Predict and compute error
     YPred_uni = predict(model_uni, XTrain_uni);
@@ -56,13 +61,12 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
 
     % Define bivariate network
     layers_bi = [
-        sequenceInputLayer(2)                              % Input with 2 features
-        convolution1dLayer(16, 256, 'Padding', 'same');
+        sequenceInputLayer(2)                             
+        convolution1dLayer(filterSize, numOfFilters * 2, 'Padding', 'same');
         reluLayer
-        fullyConnectedLayer(1)                             % Output layer
+        fullyConnectedLayer(1)                             
     ];
 
-    % Modified training options with focus on error minimization
     options_bi = trainingOptions('adam', ...
         'MaxEpochs', 200, ...
         'MiniBatchSize', 32, ...
@@ -72,6 +76,8 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
 
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
+
+    save('bivariate_model.mat', 'model_bi');
 
     % Predict and compute error
     YPred_bi = predict(model_bi, XTrain_bi);

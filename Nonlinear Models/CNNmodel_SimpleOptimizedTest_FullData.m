@@ -1,4 +1,4 @@
-function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_index, data)
+function logRatio = CNNmodel_SimpleOptimizedTest_FullData(channel1_index, channel2_index, data)
     % Simple NN implementation to compute and minimize univariate error using bivariate model.
     %
     % Parameters:
@@ -24,14 +24,14 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Define univariate network
     layers_uni = [
         sequenceInputLayer(1)
-        convolution1dLayer(16, 128, 'Padding', 'same');
+        convolution1dLayer(16, 256, 'Padding', 'same');
         reluLayer
         fullyConnectedLayer(1)  % Output layer
     ];
 
     % Training options
     options_uni = trainingOptions('adam', ...
-        'MaxEpochs', 100, ...
+        'MaxEpochs', 200, ...
         'MiniBatchSize', 32, ...
         'InitialLearnRate', 0.0001, ...
         'Shuffle', 'every-epoch', ...
@@ -57,7 +57,7 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Define bivariate network
     layers_bi = [
         sequenceInputLayer(2)                              % Input with 2 features
-        convolution1dLayer(16, 128, 'Padding', 'same');
+        convolution1dLayer(16, 256, 'Padding', 'same');
         reluLayer
         fullyConnectedLayer(1)                             % Output layer
     ];

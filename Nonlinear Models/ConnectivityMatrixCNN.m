@@ -19,6 +19,7 @@ function connectivityMatrix = ConnectivityMatrixCNN(data, channels)
                 fprintf('Processing channel pair: (%d, %d)\n', ch1, ch2);
                 % Change the model script in order to test
                 tempRow(ch2) = CNNmodel_SimpleOptimizedTest_FullData(ch1, ch2, data);
+                % tempRow(ch2) = LoadAndTestModel(ch1, ch2, data);
             end
         end
         connectivityMatrix(ch1, :) = tempRow;  % Update the row in the connectivity matrix
