@@ -12,8 +12,8 @@ function logRatio = LoadAndTestModel(channel1_index, channel2_index, testData)
     %   logRatio       : Logarithmic ratio of error variances (univariate vs bivariate)
     
     % Load Models
-    load('univariate_model.mat', 'model_uni');
-    load('bivariate_model.mat', 'model_bi');
+    load('univariate_model_electrodePair.mat', 'model_uni');
+    load('bivariate_model_electrodePair.mat', 'model_bi');
 
     % Extract data for specified channels
     channel1Data = testData(channel1_index, :);  
@@ -34,8 +34,11 @@ function logRatio = LoadAndTestModel(channel1_index, channel2_index, testData)
     YPred_bi = predict(model_bi, XTest_bi);
     error_bi = channel1Data - YPred_bi;
     var_bi = var(error_bi);
+    
 
     % Compute Log Ratio
     logRatio = log(var_uni / var_bi);
+    disp(['Variance of Univariate Error: ', num2str(var_uni)]);
+    disp(['Variance of Bivariate Error: ', num2str(var_bi)]);
     disp(['Log Ratio: ', num2str(logRatio)]);
 end

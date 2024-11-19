@@ -43,7 +43,8 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Train the univariate model
     model_uni = trainnet(XTrain_uni, YTrain_uni, layers_uni, "mse", options_uni);
 
-    save('univariate_model.mat', 'model_uni');
+    % save('univariate_model.mat', 'model_uni');
+    save('univariate_model_electrodePair.mat', 'model_uni');
 
     % Predict and compute error
     YPred_uni = predict(model_uni, XTrain_uni);
@@ -77,7 +78,8 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
 
-    save('bivariate_model.mat', 'model_bi');
+    % save('bivariate_model.mat', 'model_bi');
+    save('bivariate_model_electrodePair.mat', 'model_bi');
 
     % Predict and compute error
     YPred_bi = predict(model_bi, XTrain_bi);
@@ -90,6 +92,7 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Display the variance results
     fprintf('Variance of Univariate Error: %.4f\n', var_uni);
     fprintf('Variance of Bivariate Error: %.4f\n', var_bi);
+    fprintf('Log Ratio: %.4f\n', logRatio);
 
     % Check improvement
     if var_bi < var_uni
