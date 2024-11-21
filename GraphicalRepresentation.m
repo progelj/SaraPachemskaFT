@@ -10,7 +10,7 @@ connectivityMatrixCNN = [
     0.7475, 0.4938, 0.4766, 0.7409, 0.8747, 0.7144, 1.8683, 1.5273, NaN, 0.4005, 0.6987, 0.5754, 0.8585, 0.8818, 0.9963, 0.8709, 1.0685, 0.9348, 0.9087;
     0.5089, 0.6305, 0.3581, 0.6091, 0.6708, 0.4889, 0.4271, 0.5876, 0.5218, NaN, 0.7484, 0.7475, 0.8186, 0.7132, 0.5833, 0.3337, 0.6170, 0.5047, 0.4953;
     0.3866, 0.3345, 0.3230, 0.3549, 0.3622, 0.5748, 0.3883, 0.3258, 0.3285, 0.4648, NaN, 0.4997, 0.3188, 0.2509, 0.4527, 0.3345, 0.3454, 0.3741, 0.3785;
-    0.5187, 0.5418, 0.5753, 0.4573, 0.5511, 0.6112, 0.6452, 0.6859, 0.4982, 0.7070, 0.5037, NaN, 0.6384, 05297, 0.5036,  0.6106, 0.5908, 0.6021, 0.5438;
+    0.5187, 0.5418, 0.5753, 0.4573, 0.5511, 0.6112, 0.6452, 0.6859, 0.4982, 0.7070, 0.5037, NaN, 0.6384, 0.5297, 0.5036,  0.6106, 0.5908, 0.6021, 0.5438;
     0.5545, 0.7169, 0.7532, 0.6135, 0.6958, 0.6344, 0.8723, 0.6886, 0.7378, 0.6755, 0.6277, 0.5614, NaN, 0.9663, 0.6140, 0.8000, 0.6738, 0.9934, 0.6781;
     0.4757, 0.4664, 0.7321, 0.7762, 0.8285, 0.6122, 0.9532, 0.7518, 0.8524, 0.9010, 0.7398, 0.6192, 0.8210, NaN, 0.9761, 0.3980, 0.6778, 0.7919, 0.6905;
     0.7879, 0.6444, 0.5546, 0.9662, 0.9511, 0.8206, 0.6614, 0.8497, 0.8346, 0.6094, 0.6309, 0.6182, 0.6774, 0.9824, NaN, 0.9535, 0.8207, 0.6660, 0.7440;
@@ -20,90 +20,68 @@ connectivityMatrixCNN = [
     0.6262, 0.5291, 0.5053, 0.9296, 0.8871, 0.5262, 0.9338, 0.8534, 0.9510, 0.6670, 0.5462, 0.5429, 0.5429, 0.5839, 0.7441, 0.9152, 0.5629, 1.0545, NaN;
     ];
 
+% Finding the minimum and maximum values
+minValue = min(connectivityMatrixCNN(:)); 
+maxValue = max(connectivityMatrixCNN(:)); 
 
-% Replace NaN with 0 for graph representation
-connectivityMatrixCNN(isnan(connectivityMatrixCNN)) = 0;
+disp(minValue);
+% Define partitions and colors
+edges = linspace(minValue, maxValue, 6);  % 5 partitions
+colors = [
+    [1, 0, 0];    % Red
+    [0, 1, 0];    % Green
+    [0, 0, 1];    % Blue
+    [1, 1, 0];    % Yellow
+    [1, 0, 1];    % Magenta
+];
 
-% Create a directed graph
-G = digraph(connectivityMatrixCNN);
+% Define node names
+nodeNames = {'C3', 'Cz', 'C4', 'Fp1', 'Fp2', 'F7', 'F3', 'Fz', 'F4', 'F8', ...
+             'T7', 'T8', 'P7', 'P3', 'Pz', 'P4', 'P8', 'O1', 'O2'};
 
-% Set the weights (edge thickness) based on matrix values
-LWidths = 5 * G.Edges.Weight / max(G.Edges.Weight);
-
-% Color mapping: Map edge weights to a color scale
-colormap jet; % Set color map
-edgeColors = G.Edges.Weight / max(G.Edges.Weight); % Normalize weights for color mapping
-
-% Create a plot with customized layout
-figure;
-h = plot(G, ...
-    'LineWidth', LWidths, ...
-    'EdgeAlpha', 0.8, ...          % Transparency of edges
-    'NodeColor', 'k', ...          % Black node color
-    'MarkerSize', 8, ...           % Node size
-    'ArrowSize', 10);              % Arrow size
-
-% Set edge colors based on weights
-edgeColorIndices = ceil(edgeColors * size(colormap, 1));
-edgeColorIndices(edgeColorIndices == 0) = 1; % Avoid index 0
-colors = colormap;
-for i = 1:numedges(G)
-    highlight(h, 'Edges', i, 'EdgeColor', colors(edgeColorIndices(i), :));
+% Build the directed graph
+G = digraph();
+[numNodes, ~] = size(connectivityMatrixCNN);
+for i = 1:numNodes
+    for j = 1:numNodes
+        if ~isnan(connectivityMatrixCNN(i, j))
+            % Add edge with weight
+            G = addedge(G, i, j, connectivityMatrixCNN(i, j));
+        end
+    end
 end
 
-% Layout: Use circular layout for better readability
-layout(h, 'circle');
+% Assign edge colors based on weights
+edgeColors = zeros(numedges(G), 3);
+weights = G.Edges.Weight;
 
-% Add node labels for description
-nodeLabels = arrayfun(@(x) sprintf('Node %d', x), 1:numnodes(G), 'UniformOutput', false);
-labelnode(h, 1:numnodes(G), nodeLabels);
-
-% Add title and legend
-title('Creative Connectivity Graph - CNN', 'FontSize', 14, 'FontWeight', 'bold');
-
-% Customize axis
-axis off; % Hide axis for clean visualization
-colorbar; % Show color scale for weights
-% Replace NaN with 0 for graph representation
-connectivityMatrixCNN(isnan(connectivityMatrixCNN)) = 0;
-
-% Create a directed graph
-G = digraph(connectivityMatrixCNN);
-
-% Set the weights (edge thickness) based on matrix values
-LWidths = 5 * G.Edges.Weight / max(G.Edges.Weight);
-
-% Color mapping: Map edge weights to a color scale
-colormap jet; % Set color map
-edgeColors = G.Edges.Weight / max(G.Edges.Weight); % Normalize weights for color mapping
-
-% Create a plot with customized layout
-figure;
-h = plot(G, ...
-    'LineWidth', LWidths, ...
-    'EdgeAlpha', 0.8, ...          % Transparency of edges
-    'NodeColor', 'k', ...          % Black node color
-    'MarkerSize', 8, ...           % Node size
-    'ArrowSize', 10);              % Arrow size
-
-% Set edge colors based on weights
-edgeColorIndices = ceil(edgeColors * size(colormap, 1));
-edgeColorIndices(edgeColorIndices == 0) = 1; % Avoid index 0
-colors = colormap;
-for i = 1:numedges(G)
-    highlight(h, 'Edges', i, 'EdgeColor', colors(edgeColorIndices(i), :));
+for k = 1:numedges(G)
+    weight = weights(k);
+    for bin = 1:5
+        if edges(bin) <= weight && weight < edges(bin + 1)
+            edgeColors(k, :) = colors(bin, :);
+            break;
+        end
+    end
 end
 
-% Layout: Use circular layout for better readability
-layout(h, 'circle');
+% Plot the graph with custom node names
+figure;
+h = plot(G, 'Layout', 'force');
 
-% Add node labels for description
-nodeLabels = arrayfun(@(x) sprintf('Node %d', x), 1:numnodes(G), 'UniformOutput', false);
-labelnode(h, 1:numnodes(G), nodeLabels);
+% Set node labels to the defined names
+h.NodeLabel = nodeNames;
 
-% Add title and legend
-title('Creative Connectivity Graph - CNN', 'FontSize', 14, 'FontWeight', 'bold');
+% Apply colors to edges
+for k = 1:numedges(G)
+    highlight(h, 'Edges', k, 'EdgeColor', edgeColors(k, :), 'LineWidth', 1.0);
+end
 
-% Customize axis
-axis off; % Hide axis for clean visualization
-colorbar; % Show color scale for weights
+% Add a legend for partitions
+hold on;
+for bin = 1:5
+    plot(NaN, NaN, 'Color', colors(bin, :), 'LineWidth', 1.5, 'DisplayName', ...
+        sprintf('%.4f to %.4f', edges(bin), edges(bin + 1)));
+end
+legend('show', 'Location', 'bestoutside');
+title('Directed Graph - CNN model');
