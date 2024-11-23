@@ -1,70 +1,40 @@
-function logRatio = CNNmodel_SimpleOptimized_2Recordings(channel1_index, channel2_index, data)
+function logRatio = CNNmodel_SimpleOptimized_2Recordings(channel1_index_recording1, channel2_index_recording1, channel1_index_recording2, channel2_index_recording2, data_recording1, data_recording2)
     % Simple NN implementation to compute and minimize univariate error using bivariate model.
     %
     % Parameters:
-    %   channel1_index : Index of the first channel (target channel)
-    %   channel2_index : Index of the second channel 
-    %   data           : EEG data matrix 
+    %   channel1_index_recording1 : Index of the first channel from the first
+    %   recording
+    %   channel2_index_recording1 : Index of the second channel from the first
+    %   recording
+    %   channel1_index_recording2 : Index of the first channel from the
+    %   second recording
+    %   channel2_index_recording2 : Index of the second channel from the
+    %   second recording
+    %   data_recording1           : EEG data matrix for first recording
+    %   data_recording2           : EEG data matrix for second recording
     %
     % Returns:
     %   logRatio : Logarithmic ratio of error variances (univariate vs bivariate)
     
-    % Extract channel data
-    channel1Data = data(channel1_index, :);  
-    channel2Data = data(channel2_index, :); 
+    % Extract channels data
+    channel1_Rec1 = data_recording1(channel1_index_recording1, :);  
+    channel2_Rec1 = data_recording1(channel2_index_recording1, :); 
+    channel1_Rec2 = data_recording2(channel1_index_recording2, :);  
+    channel2_Rec2 = data_recording2(channel2_index_recording2, :); 
 
     filterSize = 16;
     numOfFilters = 128;
 
-    % Train Univariate Model    
-    X_uni = channel1Data;  
-    Y_uni = channel1Data;  
-
-    % Reshape data for NN input
-    XTrain_uni = reshape(X_uni, [], 1, 1);  
-    YTrain_uni = reshape(Y_uni, [], 1);  
-    XVal_uni = XTrain_uni;
-    YVal_uni = YTrain_uni;
-
-    % Define univariate network
-    layers_uni = [
-        sequenceInputLayer(1)
-        convolution1dLayer(filterSize, numOfFilters * 2, 'Padding', 'same');
-        reluLayer
-        fullyConnectedLayer(1)  
-    ];
-
-    % Training options
-    options_uni = trainingOptions('adam', ...
-        'MaxEpochs', 250, ...
-        'MiniBatchSize', 64, ...
-        'InitialLearnRate', 0.0001, ...
-        'ValidationData', {XVal_uni, YVal_uni}, ...
-        'Shuffle', 'every-epoch', ...
-        'Verbose', false);
-
-    % Train the univariate model
-    model_uni = trainnet(XTrain_uni, YTrain_uni, layers_uni, "mse", options_uni);
-
-    % save('univariate_model.mat', 'model_uni');
-    save('univariate_model_electrodePair.mat', 'model_uni');
-
-    % Predict and compute error
-    YPred_uni = predict(model_uni, XTrain_uni);
-    error_uni = YTrain_uni - YPred_uni;
-    var_uni = var(error_uni);  % Variance of univariate error
-    mse_uni = mean(error_uni.^2);  % MSE of univariate error
-
-    % Train Bivariate Model with Minimization
+       
+    % Train 2 same channels from different recordings
     % Prepare bivariate input and target
-    X_bi = [channel1Data; channel2Data];  % Inputs: channel1 and channel2
-    Y_bi = channel1Data;                  % Target: channel1
+    X_bi = [channel1_Rec1; channel1_Rec2];  % Inputs: channel1 and channel2
+    Y_bi = channel1_Rec1;                  % Target: channel1
 
     % Reshape data for NN input
     XTrain_bi = reshape(X_bi', [], 2, 1);  
     YTrain_bi = reshape(Y_bi, [], 1);  
-    XVal_bi = XTrain_bi;
-    YVal_bi = YTrain_bi;
+
 
     % Define bivariate network
     layers_bi = [
@@ -85,28 +55,65 @@ function logRatio = CNNmodel_SimpleOptimized_2Recordings(channel1_index, channel
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
 
-    % save('bivariate_model.mat', 'model_bi');
-    save('bivariate_model_electrodePair.mat', 'model_bi');
+    save('univariate_model_2Recordings.mat', 'model_bi');
 
     % Predict and compute error
     YPred_bi = predict(model_bi, XTrain_bi);
     error_bi = YTrain_bi - YPred_bi;
-    var_bi = var(error_bi);  % Variance of bivariate error
+    var_bi = var(error_bi);  
     mse_bi = mean(error_bi.^2);
 
+    % Train 4 channels (2 pairs) from 2 different recordings
+    % Prepare the data
+    X_qua = [channel1_Rec1; channel2_Rec1; channel1_Rec2; channel2_Rec2];  
+    Y_qua = channel1_Rec1;        
+
+    % Reshape data for NN input
+    XTrain_qua = reshape(X_qua', [], 4, 1);  
+    YTrain_qua = reshape(Y_qua, [], 1);  
+
+
+    % Define bivariate network
+    layers_qua = [
+        sequenceInputLayer(4)                             
+        convolution1dLayer(filterSize, numOfFilters * 2, 'Padding', 'same');
+        reluLayer
+        fullyConnectedLayer(1)                             
+    ];
+
+    options_qua = trainingOptions('adam', ...
+        'MaxEpochs', 300, ...
+        'MiniBatchSize', 64, ...
+        'InitialLearnRate', 0.0001, ...
+        'Shuffle', 'every-epoch', ...
+        'Verbose', false);
+
+    % Train the bivariate model
+    model_qua = trainnet(XTrain_qua, YTrain_qua, layers_qua, "mse", options_qua);
+
+    % save('bivariate_model.mat', 'model_bi');
+    save('bivariate_model_2Recordings', 'model_qua');
+
+    % Predict and compute error
+    YPred_qua = predict(model_qua, XTrain_qua);
+    error_qua = YTrain_qua - YPred_qua;
+    var_qua = var(error_qua);  
+    mse_qua = mean(error_qua.^2);
+
+
     % Log Ratio 
-    logRatio = log(var_uni / var_bi);
+    logRatio = log(var_bi / var_qua);
 
     % Display the variance results
-    fprintf('Variance of Univariate Error: %.4f\n', var_uni);
-    fprintf('Variance of Bivariate Error: %.4f\n', var_bi);
+    fprintf('Variance of Univariate Error from 2 different Recordings: %.4f\n', var_bi);
+    fprintf('Variance of Bivariate Error from 2 different Recordings: %.4f\n', var_qua);
     fprintf('Log Ratio: %.4f\n', logRatio);
 
     % Check improvement
-    if var_bi < var_uni
-        disp("Bivariate model successfully minimized the error.");
+    if var_qua < var_bi
+        disp("Quadrivariate model successfully minimized the error.");
     else
-        disp("No improvement with the bivariate model.");
+        disp("No improvement ");
     end
 end
 
