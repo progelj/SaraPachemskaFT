@@ -1,10 +1,10 @@
 function logRatio = ARmodel_FullData(channel1, channel2, data)
-    % Computes the log ratio of error variances between two channels.
+    % Computes the log ratio of error variances between two channels and saves models.
     %
     % Parameters:
-    %   channel1 : int, index of the first channel
-    %   channel2 : int, index of the second channel
-    %   data     : matrix, EEG data with channels as rows
+    %   channel1    : int, index of the first channel
+    %   channel2    : int, index of the second channel
+    %   data        : matrix, EEG data with channels as rows
     %
     % Returns:
     %   logRatio : float, logarithmic error variance ratio
@@ -21,22 +21,42 @@ function logRatio = ARmodel_FullData(channel1, channel2, data)
     X_uni = create_lagged_matrix(inputData1, order);
 
     % Fit univariate model and compute prediction error
-    error_uni = compute_model_error(X_uni, Y_target);
+    coefficients_uni = (X_uni' * X_uni) \ (X_uni' * Y_target);
+    error_uni = Y_target - X_uni * coefficients_uni;
 
-    % Create lagged predictors for bivariate model on channels1 and2
+    % Save univariate model
+    save('AR_Univariate_model.mat', 'coefficients_uni');
+    disp(['Univariate model saved']);
+
+    mse_uni = mean(error_uni.^2);
+    disp(['Mean Squared Error of Univariate Model: ', num2str(mse_uni)]);
+
+    % Create lagged predictors for bivariate model on channels 1 and 2
     X_bi = create_lagged_matrix([inputData1, inputData2], order);
 
     % Fit bivariate model and compute prediction error
-    error_bi = compute_model_error(X_bi, Y_target);
+    coefficients_bi = (X_bi' * X_bi) \ (X_bi' * Y_target);
+    error_bi = Y_target - X_bi * coefficients_bi;
+
+    % Save bivariate model
+    save('AR_Bivariate_model', 'coefficients_bi');
+    disp(['Bivariate model saved']);
+
+    % Calculate and display Mean Squared Error for Bivariate model
+    mse_bi = mean(error_bi.^2);
+    disp(['Mean Squared Error of Bivariate Model: ', num2str(mse_bi)]);
+
+    % Calculate variances
+    variance_uni = var(error_uni);
+    variance_bi = var(error_bi);
+
+    % Display variances
+    disp(['Variance of Univariate Model Error: ', num2str(variance_uni)]);
+    disp(['Variance of Bivariate Model Error: ', num2str(variance_bi)]);
 
     % Log ratio of variances
-    logRatio = log(var(error_uni) / var(error_bi));
-
-    % Calculate and display impulse response (optional, for this pair)
-    %impulseResponse = calculate_impulse_response(coefficients, order);
-    % disp('Impulse Response for the bivariate model:');
-    % disp(impulseResponse);
-
+    logRatio = log(variance_uni / variance_bi);
+    disp(['Log Ratio: ', num2str(logRatio)])
 end
 
 function laggedMatrix = create_lagged_matrix(data, order)
@@ -57,44 +77,3 @@ function laggedMatrix = create_lagged_matrix(data, order)
         laggedMatrix(:, (i-1)*numVars + (1:numVars)) = data(order+1-i:end-i, :);
     end
 end
-
-function error = compute_model_error(X, Y)
-    % Fits an autoregressive model and returns the prediction error.
-    %
-    % Parameters:
-    %   X : matrix, predictors with lagged values
-    %   Y : vector, target values
-    %
-    % Returns:
-    %   error : vector, prediction error
-
-    coefficients = (X' * X) \ (X' * Y); % Model coefficients
-    Y_pred = X * coefficients;          % Predicted values
-    error = Y - Y_pred;                 % Prediction error
-end
-
-function impulseResponse = calculate_impulse_response(coefficients, order)
-    % Calculates the impulse response for an autoregressive model.
-    %
-    % Parameters:
-    %   coefficients : vector, AR model coefficients for bivariate model
-    %   order        : int, model order (number of lags)
-    %
-    % Returns:
-    %   impulseResponse : vector, impulse response over time
-    
-    % Reshape coefficients to separate for each lag and channel
-    numChannels = 2; % Assuming bivariate model (2 channels)
-    coefficients = reshape(coefficients, order, numChannels);
-
-    % Initialize impulse response (identity for the first time step)
-    impulseResponse = eye(numChannels);
-
-    % Calculate impulse response iteratively
-    for t = 2:order
-        impulseResponse(:, t) = coefficients(t, :)' * impulseResponse(:, t - 1);
-    end
-end
-
-
-

@@ -1,4 +1,4 @@
-function logRatio = LoadAndTestModel(channel1_index, channel2_index, testData)
+function logRatio = LoadAndTestModelCNN(channel1_index, channel2_index, testData)
     % computeLogRatio: Compute the log ratio of error variances using trained CNN models.
     %
     % Parameters:

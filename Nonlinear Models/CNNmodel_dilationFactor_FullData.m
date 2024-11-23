@@ -13,42 +13,13 @@ function logRatio = CNNmodel_dilationFactor_FullData(channel1_index, channel2_in
     % Hyperparameters
     numBlocks = 4;       % Number of residual blocks
     numFilters = 32;     % Number of filters in each convolution layer
-    filterSize = 5;      % Size of the convolution filters
+    filterSize = 3;      % Size of the convolution filters
     dropoutFactor = 0.005; % Dropout probability for dropout layer
-
-    % --- Bivariate model (using both channels) ---
 
     % Extract data for both specified channels
     channel1Data = data(channel1_index, :);  % First channel to predict
     channel2Data = data(channel2_index, :);  % Second channel to assist prediction
 
-    % Prepare data
-    X_bi = [channel1Data; channel2Data];  % Input from both channels
-    Y_bi = channel1Data;                  % Target is the first channel
-
-    % Reshape for CNN input (2 features per time step)
-    XTrain_bi = reshape(X_bi', [], 2, 1);  
-    YTrain_bi = reshape(Y_bi, [], 1);       
-    XTest_bi = XTrain_bi;                   
-    YTest_bi = YTrain_bi;                   
-
-    % CNN for bivariate model
-    net_bi = createDilatedResNet(numBlocks, numFilters, filterSize, dropoutFactor, 2);
-
-    % Training options
-    options_bi = trainingOptions('adam', ...
-        'MaxEpochs', 200, ...               
-        'MiniBatchSize', 64, ...            
-        'InitialLearnRate', 0.1, ...        
-        'Shuffle', 'every-epoch', ...       
-        'ValidationData', {XTest_bi, YTest_bi}, ...
-        'ValidationFrequency', 10, ...
-        'Verbose', false, ...                   
-        'ValidationPatience', 10);
-
-    % Train and predict
-    model_bi = trainnet(XTrain_bi, YTrain_bi, net_bi, "mse", options_bi);
-    YPred_bi = predict(model_bi, XTest_bi);
 
     % --- Univariate model (using only the first channel) ---
 
@@ -78,6 +49,35 @@ function logRatio = CNNmodel_dilationFactor_FullData(channel1_index, channel2_in
     % Train and predict
     model_uni = trainnet(XTrain_uni, YTrain_uni, net_uni, "mse", options_uni);
     YPred_uni = predict(model_uni, XTest_uni);
+
+    % --- Bivariate model (using both channels) ---
+    % Prepare data
+    X_bi = [channel1Data; channel2Data];  % Input from both channels
+    Y_bi = channel1Data;                  % Target is the first channel
+
+    % Reshape for CNN input (2 features per time step)
+    XTrain_bi = reshape(X_bi', [], 2, 1);  
+    YTrain_bi = reshape(Y_bi, [], 1);       
+    XTest_bi = XTrain_bi;                   
+    YTest_bi = YTrain_bi;                   
+
+    % CNN for bivariate model
+    net_bi = createDilatedResNet(numBlocks, numFilters, filterSize, dropoutFactor, 2);
+
+    % Training options
+    options_bi = trainingOptions('adam', ...
+        'MaxEpochs', 200, ...               
+        'MiniBatchSize', 64, ...            
+        'InitialLearnRate', 0.1, ...        
+        'Shuffle', 'every-epoch', ...       
+        'ValidationData', {XTest_bi, YTest_bi}, ...
+        'ValidationFrequency', 10, ...
+        'Verbose', false, ...                   
+        'ValidationPatience', 10);
+
+    % Train and predict
+    model_bi = trainnet(XTrain_bi, YTrain_bi, net_bi, "mse", options_bi);
+    YPred_bi = predict(model_bi, XTest_bi);
 
     % --- Compute error variances ---
 

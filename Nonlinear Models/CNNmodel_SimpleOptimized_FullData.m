@@ -16,27 +16,30 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     filterSize = 16;
     numOfFilters = 128;
 
-    % Train Univariate Model
+    % Train Univariate Model    
     X_uni = channel1Data;  
     Y_uni = channel1Data;  
 
     % Reshape data for NN input
     XTrain_uni = reshape(X_uni, [], 1, 1);  
     YTrain_uni = reshape(Y_uni, [], 1);  
+    XVal_uni = XTrain_uni;
+    YVal_uni = YTrain_uni;
 
     % Define univariate network
     layers_uni = [
         sequenceInputLayer(1)
-        convolution1dLayer(filterSize, numOfFilters, 'Padding', 'same');
+        convolution1dLayer(filterSize, numOfFilters * 2, 'Padding', 'same');
         reluLayer
         fullyConnectedLayer(1)  
     ];
 
     % Training options
     options_uni = trainingOptions('adam', ...
-        'MaxEpochs', 100, ...
-        'MiniBatchSize', 32, ...
+        'MaxEpochs', 200, ...
+        'MiniBatchSize', 64, ...
         'InitialLearnRate', 0.0001, ...
+        'ValidationData', {XVal_uni, YVal_uni}, ...
         'Shuffle', 'every-epoch', ...
         'Verbose', false);
 
@@ -50,6 +53,7 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     YPred_uni = predict(model_uni, XTrain_uni);
     error_uni = YTrain_uni - YPred_uni;
     var_uni = var(error_uni);  % Variance of univariate error
+    mse_uni = mean(error_uni.^2);  % MSE of univariate error
 
     % Train Bivariate Model with Minimization
     % Prepare bivariate input and target
@@ -59,6 +63,8 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     % Reshape data for NN input
     XTrain_bi = reshape(X_bi', [], 2, 1);  
     YTrain_bi = reshape(Y_bi, [], 1);  
+    XVal_bi = XTrain_bi;
+    YVal_bi = YTrain_bi;
 
     % Define bivariate network
     layers_bi = [
@@ -69,11 +75,12 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     ];
 
     options_bi = trainingOptions('adam', ...
-        'MaxEpochs', 200, ...
-        'MiniBatchSize', 32, ...
+        'MaxEpochs', 400, ...
+        'MiniBatchSize', 64, ...
         'InitialLearnRate', 0.0001, ...
         'Shuffle', 'every-epoch', ...
-        'Verbose', false);
+        'Verbose', false,...
+        'ValidationData', {XVal_bi, YVal_bi});
 
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
@@ -85,6 +92,7 @@ function logRatio = CNNmodel_SimpleOptimized_FullData(channel1_index, channel2_i
     YPred_bi = predict(model_bi, XTrain_bi);
     error_bi = YTrain_bi - YPred_bi;
     var_bi = var(error_bi);  % Variance of bivariate error
+    mse_bi = mean(error_bi.^2);
 
     % Log Ratio 
     logRatio = log(var_uni / var_bi);

@@ -9,8 +9,9 @@ function connectivityMatrix = ConnectivityMatrixCNN(data, channels)
     %   connectivityMatrix : matrix, connectivity matrix with log error variance ratios
 
     numChannels = size(data, 1);
-    connectivityMatrix = NaN(numChannels); % Initialize with NaNs
+    % connectivityMatrix = NaN(numChannels); % Initialize with NaNs
 
+    
     % parallel processing to compute connectivity for each pair of channels
     parfor ch1 = 1:numChannels
         tempRow = NaN(1, numChannels);  % Temporary row to store results for channel `ch1`

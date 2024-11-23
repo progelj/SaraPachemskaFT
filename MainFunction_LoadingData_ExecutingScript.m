@@ -3,7 +3,7 @@
 % Paths to the EEG data and channel location files
 dataFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R03.edf';
 
-testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R11.edf';
+testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R07.edf';
 locsFile = 'C:\Users\Acer\Downloads\BCI2000.locs';
 
 % Load EEG data
@@ -23,23 +23,26 @@ EEG_test = pop_chanedit(EEG_test, 'load', {locsFile, 'filetype', 'autodetect'});
 EEG_test = pop_reref(EEG_test, []);
 EEG_test = pop_select(EEG_test, 'channel', channels);
 
-% --- Executing the scripts ---1
- 
+% --- Executing the scripts ---
+
+% Linear model
+% ARmodel_FullData(1,2, EEG.data);
 
 % This is the script for linear model - Computing the Connectivity Matrix
 % ConnectivityMatrixAR(EEG.data, channels);
 
 % This is the script for nonlinear - Computing the Connectivity Matrix
-% ConnectivityMatrixCNN(EEG.data, channels);
+ConnectivityMatrixCNN(EEG.data, channels);
 
 % This is the script if you have already saved model, and you want to test
 % on another - Connectivity Matrix
 % ConnectivityMatrixCNN(EEG_test.data, channels); 
 
 % This is executing the simple model, with 2 channels
-% CNNmodel_SimpleOptimized_FullData(1, 3, EEG.data);
+% CNNmodel_SimpleOptimized_FullData(3, 2, EEG.data);
 
-% Loading and Test the CNNmodel
-LoadAndTestModel(1,3, EEG_test.data);
+% Loading and Test the model
+%  LoadAndTestModelCNN(3, 2, EEG_test.data);
+% LoadAndTestModelAR(1,3, EEG_test.data);
 
 
