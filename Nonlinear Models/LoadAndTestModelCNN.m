@@ -15,6 +15,9 @@ function logRatio = LoadAndTestModelCNN(channel1_index, channel2_index, testData
     load('univariate_model_electrodePair.mat', 'model_uni');
     load('bivariate_model_electrodePair.mat', 'model_bi');
 
+    % load('univariate_model_combined.mat', 'model_uni');
+    % load('bivariate_model_combined.mat', 'model_bi');
+
     % Extract data for specified channels
     channel1Data = testData(channel1_index, :);  
     channel2Data = testData(channel2_index, :);

@@ -5,7 +5,7 @@ dataFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\file
 
 dataFile2 = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R03.edf';
 
-testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R07.edf';
+testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R11.edf';
 
 locsFile = 'C:\Users\Acer\Downloads\BCI2000.locs';
 
@@ -54,7 +54,7 @@ EEG_test = pop_select(EEG_test, 'channel', channels);
 
 % LoadAndTestModelAR(1,3, EEG_test.data);
 
-CNNmodel_SimpleOptimized_2Recordings(1,2,1,2, EEG.data, EEG_2.data);
+% CNNmodel_SimpleOptimized_2Recordings(1,2,1,2, EEG.data, EEG_2.data);
 
 LoadAndTestModelCNN(1, 2, EEG_test.data);
 
