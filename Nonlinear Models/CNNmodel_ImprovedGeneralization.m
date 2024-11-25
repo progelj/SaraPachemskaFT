@@ -19,9 +19,8 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
     % Parameters
     filterSize = 16;
     numOfFilters = 128;  
-    dropoutRate = 0.3;  
 
-    %% Train Univariate Model    
+    % Train Univariate Model    
     XTrain_uni = reshape(channel1Train, [], 1, 1);  
     YTrain_uni = reshape(channel1Train, [], 1);  
     XVal_uni = reshape(channel1Test, [], 1, 1);  
@@ -48,13 +47,15 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
 
     % Train the univariate model
     model_uni = trainnet(XTrain_uni, YTrain_uni, layers_uni, "mse", options_uni);
+    
+    save('univariate_model.mat', 'model_uni');
 
     % Predict and compute error on test set
     YPred_uni = predict(model_uni, XVal_uni);
     error_uni = YVal_uni - YPred_uni;
     var_uni = var(error_uni);  % Variance of univariate error
 
-    %% Train Bivariate Model
+    % Train Bivariate Model
     % Prepare bivariate input and target
     XTrain_bi = [channel1Train; channel2Train]';  % Inputs: channel1 and channel2
     YTrain_bi = channel1Train;                   % Target: channel1
@@ -88,12 +89,14 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
 
+    save('bivariate_model.mat', 'model_bi');
+
     % Predict and compute error on test set
     YPred_bi = predict(model_bi, XVal_bi);
     error_bi = YVal_bi - YPred_bi;
     var_bi = var(error_bi);  % Variance of bivariate error
 
-    %% Compute Log Ratio and Display Results
+    % Compute Log Ratio and Display Results
     logRatio = log(var_uni / var_bi);
     fprintf('Variance of Univariate Error: %.4f\n', var_uni);
     fprintf('Variance of Bivariate Error: %.4f\n', var_bi);

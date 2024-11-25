@@ -3,9 +3,9 @@
 % Paths to the EEG data and channel location files
 dataFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R11.edf';
 
-dataFile2 = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R03.edf';
+% dataFile2 = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R07.edf';
 
-testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R11.edf';
+testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R07.edf';
 
 locsFile = 'C:\Users\Acer\Downloads\BCI2000.locs';
 
@@ -21,10 +21,10 @@ EEG = pop_chanedit(EEG, 'load', {locsFile, 'filetype', 'autodetect'});
 EEG = pop_reref(EEG, []);
 EEG = pop_select(EEG, 'channel', channels);
 
-EEG_2 = pop_biosig(dataFile2);
-EEG_2 = pop_chanedit(EEG_2, 'load', {locsFile, 'filetype', 'autodetect'});
-EEG_2 = pop_reref(EEG_2, []);
-EEG_2 = pop_select(EEG_2, 'channel', channels);
+% EEG_2 = pop_biosig(dataFile2);
+% EEG_2 = pop_chanedit(EEG_2, 'load', {locsFile, 'filetype', 'autodetect'});
+% EEG_2 = pop_reref(EEG_2, []);
+% EEG_2 = pop_select(EEG_2, 'channel', channels);
 
 % Load Testing EEG data (testFile)
 EEG_test = pop_biosig(testFile);
@@ -54,8 +54,9 @@ EEG_test = pop_select(EEG_test, 'channel', channels);
 
 % LoadAndTestModelAR(1,3, EEG_test.data);
 
-% CNNmodel_SimpleOptimized_2Recordings(1,2,1,2, EEG.data, EEG_2.data);
+% LoadAndTestModelCNN(1, 2, EEG_test.data);
 
-LoadAndTestModelCNN(1, 2, EEG_test.data);
+% CNNmodel_ImprovedGeneralization(1,3, EEG.data, EEG.data);
 
+testSavedModels(1,3, EEG_test.data);
 
