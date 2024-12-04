@@ -9,6 +9,15 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
     %
     % Returns:
     %   logRatio : Logarithmic ratio of error variances (univariate vs bivariate)
+
+     
+    % Create directory to save the models
+    outputDir = 'trained_models_allpairs';
+    if ~exist(outputDir, 'dir')
+        mkdir(outputDir);
+    end
+   
+
     
     % Extract channel data for training and testing
     channel1Train = dataTrain(channel1_index, :);  
@@ -42,13 +51,17 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
         'InitialLearnRate', 0.0001, ...
         'ValidationData', {XVal_uni, YVal_uni}, ...
         'Shuffle', 'every-epoch', ...
-        'Verbose', false, ...
-        'Plots', 'training-progress');
+        'Verbose', false);
 
     % Train the univariate model
     model_uni = trainnet(XTrain_uni, YTrain_uni, layers_uni, "mse", options_uni);
     
-    save('univariate_model.mat', 'model_uni');
+    % saving for one pair
+    % save('univariate_model.mat', 'model_uni');
+
+    % Save for all pairs / also works for one pair just tracking of indices
+    save(fullfile(outputDir, sprintf('univariate_model_ch%d_ch%d.mat', channel1_index, channel2_index)), 'model_uni');
+
 
     % Predict and compute error on test set
     YPred_uni = predict(model_uni, XVal_uni);
@@ -83,13 +96,15 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
         'InitialLearnRate', 0.0001, ...
         'ValidationData', {XVal_bi, YVal_bi}, ...
         'Shuffle', 'every-epoch', ...
-        'Verbose', false, ...
-        'Plots', 'training-progress');
+        'Verbose', false);
 
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
 
-    save('bivariate_model.mat', 'model_bi');
+    % save('bivariate_model.mat', 'model_bi');
+
+    % Same as univariate model
+    save(fullfile(outputDir, sprintf('bivariate_model_ch%d_ch%d.mat', channel1_index, channel2_index)), 'model_bi');
 
     % Predict and compute error on test set
     YPred_bi = predict(model_bi, XVal_bi);

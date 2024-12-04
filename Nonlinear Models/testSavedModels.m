@@ -14,6 +14,7 @@ function testSavedModels(channel1_index, channel2_index, dataTest)
     channel1Test = dataTest(channel1_index, :);  
     channel2Test = dataTest(channel2_index, :); 
 
+
     % Load saved models
     load('univariate_model.mat', 'model_uni');
     load('bivariate_model.mat', 'model_bi');

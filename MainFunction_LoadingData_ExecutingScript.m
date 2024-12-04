@@ -1,11 +1,11 @@
 % Main script to compute the connectivity matrix using CNN model log error variance ratios
 
 % Paths to the EEG data and channel location files
-dataFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R11.edf';
+dataFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R03.edf';
 
 % dataFile2 = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R07.edf';
 
-testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S001\S001R07.edf';
+testFile = 'C:\Users\Acer\Downloads\eeg-motor-movementimagery-dataset-1.0.0\files\S020\S020R03.edf';
 
 locsFile = 'C:\Users\Acer\Downloads\BCI2000.locs';
 
@@ -35,7 +35,7 @@ EEG_test = pop_select(EEG_test, 'channel', channels);
 % --- Executing the scripts ---
 
 % Linear model
-% ARmodel_FullData(1,2, EEG.data);
+% ARmodel_FullData(1,3, EEG.data);
 
 % This is the script for linear model - Computing the Connectivity Matrix
 % ConnectivityMatrixAR(EEG.data, channels);
@@ -52,11 +52,10 @@ EEG_test = pop_select(EEG_test, 'channel', channels);
 
 % Loading and Test the model
 
-% LoadAndTestModelAR(1,3, EEG_test.data);
+LoadAndTestModelAR(4,5, EEG_test.data);
 
-% LoadAndTestModelCNN(1, 2, EEG_test.data);
 
 % CNNmodel_ImprovedGeneralization(1,3, EEG.data, EEG.data);
 
-testSavedModels(1,3, EEG_test.data);
+% testSavedModels(4,5, EEG_test.data);
 
