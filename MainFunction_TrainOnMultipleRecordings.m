@@ -54,11 +54,11 @@ disp(['Shape of testData: ', num2str(size(testData))]);
 disp('Training CNN model...');
 % CNNmodel_ImprovedGeneralization(1, 3, trainData, trainData);
 
-% Training All Pairs - CNN
+% Training All Pairs
 
 logRatios = NaN(19, 19); % Pre-fill with NaN to handle diagonal pairs automatically
 
-% Training All Pairs - CNN
+% Training All Pairs 
 for ch1 = 1:19
     for ch2 = 1:19
         if ch1 == ch2
@@ -68,7 +68,8 @@ for ch1 = 1:19
         end
         
         fprintf('Training model for channels (%d, %d)...\n', ch1, ch2);
-        logRatios(ch1, ch2) = CNNmodel_ImprovedGeneralization(ch1, ch2, trainData, testData);
+        % logRatios(ch1, ch2) = CNNmodel_ImprovedGeneralization(ch1, ch2, trainData, testData);
+        logRatios(ch1, ch2) = ARmodel_FullData(ch1, ch2, trainData);
     end
 end
 

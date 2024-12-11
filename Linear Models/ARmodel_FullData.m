@@ -9,6 +9,12 @@ function logRatio = ARmodel_FullData(channel1, channel2, data)
     % Returns:
     %   logRatio : float, logarithmic error variance ratio
 
+    % Create directory to save the models just used for testing
+    outputDir = 'trained_models_allpairs_AR';
+    if ~exist(outputDir, 'dir')
+        mkdir(outputDir);
+    end
+
     order = 16; % Model order
 
     % Prepare data for univariate and bivariate models
@@ -25,8 +31,11 @@ function logRatio = ARmodel_FullData(channel1, channel2, data)
     error_uni = Y_target - X_uni * coefficients_uni;
 
     % Save univariate model
-    save('AR_Univariate_model.mat', 'coefficients_uni');
-    disp(['Univariate model saved']);
+    % save('AR_Univariate_model.mat', 'coefficients_uni');
+    % disp(['Univariate model saved']);
+
+    save(fullfile(outputDir, sprintf('univariate_model_ch%d_ch%d.mat', channel1, channel2)), 'coefficients_uni');
+
 
     mse_uni = mean(error_uni.^2);
     disp(['Mean Squared Error of Univariate Model: ', num2str(mse_uni)]);
@@ -39,8 +48,10 @@ function logRatio = ARmodel_FullData(channel1, channel2, data)
     error_bi = Y_target - X_bi * coefficients_bi;
 
     % Save bivariate model
-    save('AR_Bivariate_model', 'coefficients_bi');
-    disp(['Bivariate model saved']);
+    % save('AR_Bivariate_model', 'coefficients_bi');
+    % disp(['Bivariate model saved']);
+    save(fullfile(outputDir, sprintf('bivariate_model_ch%d_ch%d.mat', channel1, channel2)), 'coefficients_bi');
+
 
     % Calculate and display Mean Squared Error for Bivariate model
     mse_bi = mean(error_bi.^2);
