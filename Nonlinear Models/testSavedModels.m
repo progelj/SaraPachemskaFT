@@ -1,4 +1,4 @@
-function testSavedModels(channel1_index, channel2_index, dataTest)
+function TestSavedModels(channel1_index, channel2_index, dataTest)
     % Test Saved Models on New Data
     %
     % Parameters:

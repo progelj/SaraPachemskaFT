@@ -68,23 +68,11 @@ for ch1 = 1:19
         end
         
         fprintf('Training model for channels (%d, %d)...\n', ch1, ch2);
-        % logRatios(ch1, ch2) = CNNmodel_ImprovedGeneralization(ch1, ch2, trainData, testData);
-        logRatios(ch1, ch2) = ARmodel_FullData(ch1, ch2, trainData);
+        logRatios(ch1, ch2) = CNNmodel_ImprovedGeneralization(ch1, ch2, trainData, testData);
+        % logRatios(ch1, ch2) = ARmodel_FullData(ch1, ch2, trainData);
     end
 end
 
-% modelDir = 'trained_models';
-% logRatios = zeros(19, 19);
-% 
-% for ch1 = 1:19
-%     for ch2 = 1:19
-%         fprintf('Testing model for channels (%d, %d)...\n', ch1, ch2);
-%         logRatios(ch1, ch2) = testModels_AllPairs(ch1, ch2, dataTest, modelDir);
-%     end
-% end
-% 
-% Save the test results
-% save('test_results.mat', 'logRatios');
 
 
 disp('Training and evaluation complete!');

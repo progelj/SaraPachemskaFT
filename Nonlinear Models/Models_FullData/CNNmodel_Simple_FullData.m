@@ -101,4 +101,12 @@ function logRatio = CNNmodel_Simple_FullData(channel1_index, channel2_index, dat
     % 
     % % Compute the logarithmic ratio of error variances 
     logRatio = log(var_uni / var_bi);  % Logarithmic ratio of variances
+
+     % Compute MSE for both models
+    mse_bi = mean(error_bi.^2);  % MSE for bivariate model
+    mse_uni = mean(error_uni.^2);  % MSE for univariate model
+
+    % Display the results 
+    fprintf('Bivariate Model MSE: %.4f\n', mse_bi);
+    fprintf('Univariate Model MSE: %.4f\n', mse_uni);
 end

@@ -64,6 +64,9 @@ function logRatio = CNNmodel_dilationFactor_FullData(channel1_index, channel2_in
     % CNN for bivariate model
     net_bi = createDilatedResNet(numBlocks, numFilters, filterSize, dropoutFactor, 2);
 
+    save('CNN_dilation.mat', 'net_bi');
+
+
     % Training options
     options_bi = trainingOptions('adam', ...
         'MaxEpochs', 200, ...               
@@ -91,6 +94,13 @@ function logRatio = CNNmodel_dilationFactor_FullData(channel1_index, channel2_in
 
     % Logarithmic ratio of variances
     logRatio = log(var_uni / var_bi);
+      % Compute MSE for both models
+    mse_bi = mean(error_bi.^2);  % MSE for bivariate model
+    mse_uni = mean(error_uni.^2);  % MSE for univariate model
+
+    % Display the results 
+    fprintf('Bivariate Model MSE: %.4f\n', mse_bi);
+    fprintf('Univariate Model MSE: %.4f\n', mse_uni);
 end
 
 function net = createDilatedResNet(numBlocks, numFilters, filterSize, dropoutFactor, inputSize)

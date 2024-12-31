@@ -12,10 +12,10 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
 
      
     % Create directory to save the models
-    outputDir = 'trained_models_allpairs';
-    if ~exist(outputDir, 'dir')
-        mkdir(outputDir);
-    end
+    % outputDir = 'trained_models_allpairs';
+    % if ~exist(outputDir, 'dir')
+    %     mkdir(outputDir);
+    % end
    
 
     
@@ -57,10 +57,10 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
     model_uni = trainnet(XTrain_uni, YTrain_uni, layers_uni, "mse", options_uni);
     
     % saving for one pair
-    % save('univariate_model.mat', 'model_uni');
+    save('univariate_model.mat', 'model_uni');
 
     % Save for all pairs / also works for one pair just tracking of indices
-    save(fullfile(outputDir, sprintf('univariate_model_ch%d_ch%d.mat', channel1_index, channel2_index)), 'model_uni');
+    % save(fullfile(outputDir, sprintf('univariate_model_ch%d_ch%d.mat', channel1_index, channel2_index)), 'model_uni');
 
 
     % Predict and compute error on test set
@@ -101,10 +101,10 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
     % Train the bivariate model
     model_bi = trainnet(XTrain_bi, YTrain_bi, layers_bi, "mse", options_bi);
 
-    % save('bivariate_model.mat', 'model_bi');
+    save('bivariate_model.mat', 'model_bi');
 
     % Same as univariate model
-    save(fullfile(outputDir, sprintf('bivariate_model_ch%d_ch%d.mat', channel1_index, channel2_index)), 'model_bi');
+    % save(fullfile(outputDir, sprintf('bivariate_model_ch%d_ch%d.mat', channel1_index, channel2_index)), 'model_bi');
 
     % Predict and compute error on test set
     YPred_bi = predict(model_bi, XVal_bi);
@@ -122,4 +122,12 @@ function logRatio = CNNmodel_ImprovedGeneralization(channel1_index, channel2_ind
     else
         disp("No improvement with the bivariate model.");
     end
+
+      % Compute MSE for both models
+    mse_bi = mean(error_bi.^2);  % MSE for bivariate model
+    mse_uni = mean(error_uni.^2);  % MSE for univariate model
+
+    % Display the results 
+    fprintf('Bivariate Model MSE: %.4f\n', mse_bi);
+    fprintf('Univariate Model MSE: %.4f\n', mse_uni);
 end
